@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0f1a">
+  <title>Station 1 – Der Auftrag | Mister X</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar" class="topbar"></div>
+
+<!-- PAGE -->
+<div class="page-wrap stack stack-lg">
+
+  <!-- Station Header -->
+  <div class="station-header">
+    <div class="station-number">⚡ Station 01 von 15</div>
+    <h1 class="station-title">Der Auftrag</h1>
+    <p>Die Zentrale hat euch kontaktiert. Eine unbekannte Person stiehlt geheime Informationen – und ihr sollt sie finden!</p>
+  </div>
+
+  <!-- AVATAR -->
+  <div class="card reveal">
+    <div class="avatar-wrap">
+      <div class="avatar-img center" style="font-size:2rem; border:2px solid var(--c-accent);">🤖</div>
+      <div id="avatarBubble" class="avatar-bubble">
+        Hallo Agent! Ich bin K – dein digitaler Begleiter auf dieser Mission. Klick auf "Tipps", wenn du nicht weiterkommst!
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="margin:0.5rem 0 0 0.75rem;" onclick="avatarSpeak()">
+      🔊 Nochmal vorlesen
+    </button>
+  </div>
+
+  <!-- AUFGABE / RÄTSEL -->
+  <div class="card card-accent reveal">
+    <div class="badge badge-gold" style="margin-bottom:0.75rem;">📋 Deine Aufgabe</div>
+    <h2 style="margin-bottom:0.75rem;">Das Zahlenrätsel</h2>
+    <p style="margin-bottom:1rem;">
+      Mister X hat eine verschlüsselte Nachricht hinterlassen. An eurem Startpunkt findet ihr einen 
+      <strong>roten Umschlag</strong>. Darin steckt ein Blatt mit Zahlen. Löst die Aufgabe:
+    </p>
+    <div class="card" style="background:var(--c-surface2); margin-bottom:1rem;">
+      <p style="font-family:var(--font-head); font-size:0.9rem; color:var(--c-accent); text-align:center; line-height:2;">
+        🔢 &nbsp;3 × 4 + 8 − 2 = ?<br>
+        <span style="font-size:0.75rem; color:var(--c-muted);">(Tipp: Rechenreihenfolge beachten!)</span>
+      </p>
+    </div>
+    <p style="font-size:0.875rem; color:var(--c-muted);">
+      Der Code aus dem Umschlag + eure Antwort ergeben das Lösungswort. Tragt das 
+      <strong>Lösungswort</strong> unten ein!
+    </p>
+  </div>
+
+  <!-- LÖSUNGSEINGABE -->
+  <div class="card reveal stack stack-sm">
+    <label style="font-weight:700; font-size:0.9rem;">🔑 Lösungswort eingeben</label>
+    <input id="answerInput" class="input-field" type="text"
+           placeholder="Lösungswort..." autocomplete="off" autocapitalize="none"
+           onkeydown="if(event.key==='Enter') checkAnswer()">
+    <button class="btn btn-primary btn-full" onclick="checkAnswer()">Überprüfen ✓</button>
+    <div id="feedbackMsg" style="text-align:center; font-weight:700; min-height:1.5rem; font-size:0.9rem;"></div>
+  </div>
+
+  <!-- HINT SYSTEM -->
+  <div class="card reveal stack hint-section">
+    <div class="row" style="gap:0.5rem; margin-bottom:0.25rem;">
+      <span style="font-size:1.1rem;">💡</span>
+      <strong>Tipps (kosten Sterne!)</strong>
+    </div>
+
+    <div class="hint-item">
+      <button class="hint-toggle" data-hint="1">
+        <span>Tipp 1 – Wie rechne ich das?</span>
+        <span class="icon">›</span>
+      </button>
+      <div class="hint-body">
+        Denke an die Regel: "Punkt vor Strich". Rechne also zuerst 3 × 4, dann addiere und subtrahiere.
+      </div>
+    </div>
+
+    <div class="hint-item">
+      <button class="hint-toggle" data-hint="2">
+        <span>Tipp 2 – Das Lösungswort</span>
+        <span class="icon">›</span>
+      </button>
+      <div class="hint-body">
+        Das Lösungswort besteht aus 5 Buchstaben und steht in Großbuchstaben auf dem Umschlag-Zettel neben der Zahl 18.
+      </div>
+    </div>
+
+    <div class="hint-item">
+      <button class="hint-toggle" data-hint="3">
+        <span>Tipp 3 – Notfall-Hinweis</span>
+        <span class="icon">›</span>
+      </button>
+      <div class="hint-body">
+        Das gesuchte Wort ist: <strong style="color:var(--c-accent);">ALPHA</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEHRER-PANEL -->
+  <div id="teacherPanel" class="teacher-panel">
+    <strong style="color:var(--c-danger);">🔓 Lehrer-Modus</strong><br><br>
+    <strong>Lösung:</strong> ALPHA<br>
+    <strong>Rechenergebnis:</strong> 3×4+8−2 = 18<br>
+    <strong>Material:</strong> Roter Umschlag, Zettel mit Zahl 18 + Lösungswort<br>
+    <strong>Zeitbudget:</strong> ~10 Minuten<br>
+    <strong>Nächste Station:</strong> /station/zwei<br><br>
+    <button class="btn btn-sm" style="border:1px solid var(--c-danger); color:var(--c-danger);"
+            onclick="skipStation()">Station überspringen (Notfall)</button>
+  </div>
+
+  <!-- NAV BOTTOM -->
+  <div style="height:2rem;"></div>
+
+</div><!-- /page-wrap -->
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <a href="/" class="btn btn-secondary btn-sm" style="flex:1;">← Übersicht</a>
+  <button class="btn btn-sm btn-ghost" style="flex:1;" onclick="avatarSpeak()">🤖 Agent K</button>
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div id="successOverlay" class="success-overlay"></div>
+
+<!-- SCRIPTS -->
+<script src="/assets/js/game.js"></script>
+<script>
+  // ── Station-Konfiguration ─────────────────────────────────────────────────
+  const STATION_NUM  = 1;
+  const STATION_NEXT = 'zwei';     // Slug der nächsten Station
+  const CORRECT_ANSWER = 'alpha';  // Lösung (lowercase, trim() passiert in CodeChecker)
+
+  let hintsThisRound = 0;
+
+  // Original hints-init überschreiben um Zähler mitzuführen
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.hint-toggle').forEach(btn => {
+      btn.addEventListener('click', () => { hintsThisRound++; });
+    });
+
+    // Teacher panel anzeigen falls bereits aktiv
+    if (MX.state.teacherMode) {
+      document.getElementById('teacherPanel').classList.add('visible');
+    }
+
+    // Station bereits gelöst?
+    if (MX.isCompleted(STATION_NUM)) {
+      showAlreadyDone();
+    }
+
+    // Avatar Intro
+    setTimeout(() => {
+      Avatar.speak('Willkommen Agent! Station 1 – der Auftrag wartet auf dich. Findet den roten Umschlag und löst das Rätsel!');
+    }, 800);
+  });
+
+  function checkAnswer() {
+    const input = document.getElementById('answerInput').value;
+    const msg   = document.getElementById('feedbackMsg');
+
+    if (!input.trim()) {
+      msg.textContent = '⚠️ Bitte eine Antwort eingeben!';
+      msg.style.color = 'var(--c-danger)';
+      return;
+    }
+
+    if (CodeChecker.check(input, CORRECT_ANSWER)) {
+      msg.textContent = '✅ Richtig!';
+      msg.style.color = 'var(--c-success)';
+
+      const stars = MX.completeStation(STATION_NUM, hintsThisRound);
+      const msgs  = [
+        'Perfekt – keine Tipps gebraucht!',
+        'Gut gemacht! Weiter so.',
+        'Geschafft! Nächste Station wartet.',
+      ];
+
+      setTimeout(() => {
+        Success.show(STATION_NUM, stars, STATION_NEXT, msgs[3 - stars] || msgs[2]);
+      }, 600);
+
+    } else {
+      msg.textContent = '❌ Nicht ganz – versuche es nochmal!';
+      msg.style.color = 'var(--c-danger)';
+      CodeChecker.shake('answerInput');
+      Avatar.speak('Das war leider nicht richtig. Schaut nochmal genau auf den Zettel!');
+    }
+  }
+
+  function avatarSpeak() {
+    const phrases = [
+      'Ihr schafft das! Denkt an die Rechenreihenfolge – Punkt vor Strich!',
+      'Der rote Umschlag liegt am vereinbarten Startpunkt bereit.',
+      'Sucht die Zahl 18 auf dem Zettel – daneben steht das Lösungswort!',
+    ];
+    const text = phrases[Math.floor(Math.random() * phrases.length)];
+    Avatar.speak(text);
+  }
+
+  function skipStation() {
+    if (confirm('Station wirklich überspringen? (Lehrer-Notfall)')) {
+      MX.completeStation(STATION_NUM, 3);
+      location.href = `/station/${STATION_NEXT}`;
+    }
+  }
+
+  function showAlreadyDone() {
+    const feedback = document.getElementById('feedbackMsg');
+    feedback.textContent = '✅ Diese Station hast du bereits gelöst!';
+    feedback.style.color = 'var(--c-success)';
+  }
+</script>
+</body>
+</html>

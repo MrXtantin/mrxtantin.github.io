@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0f1a">
+  <title>Station [NUMMER] – [TITEL] | Mister X</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar" class="topbar"></div>
+
+<div class="page-wrap stack stack-lg">
+
+  <!-- ① STATION HEADER — anpassen -->
+  <div class="station-header">
+    <div class="station-number">⚡ Station [NUMMER] von 15</div>
+    <h1 class="station-title">[TITEL DER STATION]</h1>
+    <p>[Kurze einleitende Beschreibung, 1–2 Sätze. Was passiert hier in der Story?]</p>
+  </div>
+
+  <!-- ② AVATAR — Intro-Text anpassen -->
+  <div class="card reveal">
+    <div class="avatar-wrap">
+      <div class="avatar-img center" style="font-size:2rem;">🤖</div>
+      <div id="avatarBubble" class="avatar-bubble">
+        [Intro-Text von Agent K für diese Station. Direkt, motivierend, 1-2 Sätze.]
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="margin:0.5rem 0 0 0.75rem;" onclick="avatarSpeak()">
+      🔊 Nochmal vorlesen
+    </button>
+  </div>
+
+  <!-- ③ AUFGABE / RÄTSEL — Inhalt anpassen -->
+  <div class="card card-accent reveal">
+    <div class="badge badge-gold" style="margin-bottom:0.75rem;">📋 Deine Aufgabe</div>
+    <h2 style="margin-bottom:0.75rem;">[Aufgaben-Titel]</h2>
+    <p style="margin-bottom:1rem;">
+      [Rätsel-Beschreibung. Was sollen die Kinder tun? Wo ist der Hinweis vor Ort?
+       Was muss berechnet, gefunden oder entschlüsselt werden?]
+    </p>
+    <!-- Optional: Rätsel-Visual -->
+    <div class="card" style="background:var(--c-surface2); margin-bottom:1rem; text-align:center;">
+      <p style="font-family:var(--font-head); color:var(--c-accent); font-size:0.9rem; line-height:2;">
+        [Rätsel-Element, z.B. Gleichung, Buchstaben-Code, Bild-Beschreibung]
+      </p>
+    </div>
+    <p style="font-size:0.875rem; color:var(--c-muted);">
+      [Instruktion: "Tragt das Lösungswort unten ein" oder "Gebt den 4-stelligen Code ein"]
+    </p>
+  </div>
+
+  <!-- ④ LÖSUNGSEINGABE — VARIANTE A: Freitext -->
+  <div class="card reveal stack stack-sm">
+    <label style="font-weight:700; font-size:0.9rem;">🔑 Lösungswort eingeben</label>
+    <input id="answerInput" class="input-field" type="text"
+           placeholder="Lösungswort..." autocomplete="off" autocapitalize="none"
+           onkeydown="if(event.key==='Enter') checkAnswer()">
+    <button class="btn btn-primary btn-full" onclick="checkAnswer()">Überprüfen ✓</button>
+    <div id="feedbackMsg" style="text-align:center; font-weight:700; min-height:1.5rem;"></div>
+  </div>
+
+  <!-- VARIANTE B: Zahlen-Code (4-stellig) — statt Variante A einfügen
+  <div class="card reveal stack stack-sm">
+    <label style="font-weight:700; font-size:0.9rem;">🔢 4-stelligen Code eingeben</label>
+    <div class="code-input-row" id="codeInputs">
+      <input class="code-digit" type="number" min="0" max="9" inputmode="numeric">
+      <input class="code-digit" type="number" min="0" max="9" inputmode="numeric">
+      <input class="code-digit" type="number" min="0" max="9" inputmode="numeric">
+      <input class="code-digit" type="number" min="0" max="9" inputmode="numeric">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="checkCodeAnswer()">Entsperren 🔓</button>
+    <div id="feedbackMsg" style="text-align:center; font-weight:700; min-height:1.5rem;"></div>
+  </div>
+  -->
+
+  <!-- VARIANTE C: QR-Code Scanner — statt Variante A einfügen
+  <div class="card reveal stack stack-sm">
+    <label style="font-weight:700; font-size:0.9rem;">📷 QR-Code scannen</label>
+    <div style="position:relative; border-radius:var(--radius-md); overflow:hidden; background:#000; aspect-ratio:1;">
+      <video id="qrVideo" style="width:100%; display:block;" playsinline muted></video>
+      <canvas id="qrCanvas" style="display:none;"></canvas>
+      <div style="position:absolute;inset:0;border:3px solid var(--c-accent);border-radius:var(--radius-md);pointer-events:none;opacity:0.6;"></div>
+    </div>
+    <button class="btn btn-secondary btn-full" onclick="startQR()">📷 Kamera starten</button>
+    <div id="feedbackMsg" style="text-align:center; font-weight:700; min-height:1.5rem;"></div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  -->
+
+  <!-- ⑤ HINTS — Texte anpassen -->
+  <div class="card reveal stack hint-section">
+    <div class="row" style="gap:0.5rem; margin-bottom:0.25rem;">
+      <span>💡</span><strong>Tipps (kosten Sterne!)</strong>
+    </div>
+
+    <div class="hint-item">
+      <button class="hint-toggle" data-hint="1">
+        <span>Tipp 1 – [Kurze Beschreibung]</span>
+        <span class="icon">›</span>
+      </button>
+      <div class="hint-body">[Erster, sanfter Hinweis. Schubst in die richtige Richtung ohne zu viel zu verraten.]</div>
+    </div>
+
+    <div class="hint-item">
+      <button class="hint-toggle" data-hint="2">
+        <span>Tipp 2 – [Kurze Beschreibung]</span>
+        <span class="icon">›</span>
+      </button>
+      <div class="hint-body">[Konkreterer Hinweis. Beschreibt genauer, wo/was zu suchen ist.]</div>
+    </div>
+
+    <div class="hint-item">
+      <button class="hint-toggle" data-hint="3">
+        <span>Tipp 3 – Notfall-Hinweis</span>
+        <span class="icon">›</span>
+      </button>
+      <div class="hint-body">
+        Das Lösungswort lautet: <strong style="color:var(--c-accent);">[LÖSUNG]</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ LEHRER-PANEL — Infos ausfüllen -->
+  <div id="teacherPanel" class="teacher-panel">
+    <strong style="color:var(--c-danger);">🔓 Lehrer-Modus – Station [NUMMER]</strong><br><br>
+    <strong>Lösung:</strong> [LÖSUNG]<br>
+    <strong>Material vor Ort:</strong> [Was liegt dort? Z.B. Zettel, QR-Code, Umschlag...]<br>
+    <strong>Koordinaten / Ort:</strong> [Beschreibung des Aufstellungsorts]<br>
+    <strong>Aufbau:</strong> [Wann aufstellen? Besonderheiten?]<br>
+    <strong>Zeitbudget:</strong> ~10 Minuten<br>
+    <strong>Nächste Station:</strong> /station/[NÄCHSTER-SLUG]<br><br>
+    <button class="btn btn-sm" style="border:1px solid var(--c-danger); color:var(--c-danger);"
+            onclick="skipStation()">Station überspringen (Notfall)</button>
+  </div>
+
+  <div style="height:2rem;"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <a href="/" class="btn btn-secondary btn-sm" style="flex:1;">← Übersicht</a>
+  <button class="btn btn-sm btn-ghost" style="flex:1;" onclick="avatarSpeak()">🤖 Agent K</button>
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div id="successOverlay" class="success-overlay"></div>
+
+<script src="/assets/js/game.js"></script>
+<script>
+  // ══════════════════════════════════════════════════
+  // STATION KONFIGURATION — HIER ANPASSEN!
+  // ══════════════════════════════════════════════════
+
+  const STATION_NUM    = 0;       // ← Stationsnummer (1–15)
+  const STATION_NEXT   = '';      // ← Slug der nächsten Station, z.B. 'drei'
+  const CORRECT_ANSWER = '';      // ← Lösung in Kleinbuchstaben, z.B. 'geheimwort'
+
+  // Avatar-Aussagen für diese Station (werden zufällig gewählt)
+  const AVATAR_PHRASES = [
+    '[Phrase 1 – motivierend]',
+    '[Phrase 2 – Hinweis auf Material vor Ort]',
+    '[Phrase 3 – Tipp ohne Lösung zu verraten]',
+  ];
+
+  // ══════════════════════════════════════════════════
+
+  let hintsThisRound = 0;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.hint-toggle').forEach(btn => {
+      btn.addEventListener('click', () => { hintsThisRound++; });
+    });
+
+    if (MX.state.teacherMode) {
+      document.getElementById('teacherPanel').classList.add('visible');
+    }
+
+    if (MX.isCompleted(STATION_NUM)) {
+      const fb = document.getElementById('feedbackMsg');
+      fb.textContent = '✅ Diese Station hast du bereits gelöst!';
+      fb.style.color = 'var(--c-success)';
+    }
+
+    // Für Zahlen-Code: Digit-Navigation initialisieren
+    // CodeChecker.initDigitInputs('codeInputs');
+
+    setTimeout(() => {
+      Avatar.speak(AVATAR_PHRASES[0]);
+    }, 800);
+  });
+
+  // VARIANTE A: Freitext-Prüfung
+  function checkAnswer() {
+    const input = document.getElementById('answerInput').value;
+    const msg   = document.getElementById('feedbackMsg');
+    if (!input.trim()) {
+      msg.textContent = '⚠️ Bitte eine Antwort eingeben!';
+      msg.style.color = 'var(--c-danger)'; return;
+    }
+    if (CodeChecker.check(input, CORRECT_ANSWER)) {
+      handleSuccess(msg);
+    } else {
+      handleWrong(msg);
+    }
+  }
+
+  // VARIANTE B: Zahlen-Code-Prüfung (einkommentieren wenn nötig)
+  /*
+  function checkCodeAnswer() {
+    const val = CodeChecker.getDigitValue('codeInputs');
+    const msg = document.getElementById('feedbackMsg');
+    if (val.length < 4) { msg.textContent = '⚠️ Alle 4 Stellen eingeben!'; return; }
+    if (CodeChecker.check(val, CORRECT_ANSWER)) {
+      handleSuccess(msg);
+    } else {
+      handleWrong(msg);
+    }
+  }
+  */
+
+  // VARIANTE C: QR-Code (einkommentieren wenn nötig)
+  /*
+  function startQR() {
+    QRScanner.start('qrVideo', 'qrCanvas', (data) => {
+      QRScanner.stop();
+      if (CodeChecker.check(data, CORRECT_ANSWER)) {
+        handleSuccess(document.getElementById('feedbackMsg'));
+      } else {
+        handleWrong(document.getElementById('feedbackMsg'));
+      }
+    });
+  }
+  */
+
+  function handleSuccess(msg) {
+    msg.textContent = '✅ Richtig!';
+    msg.style.color = 'var(--c-success)';
+    const stars = MX.completeStation(STATION_NUM, hintsThisRound);
+    setTimeout(() => {
+      Success.show(STATION_NUM, stars, STATION_NEXT);
+    }, 600);
+  }
+
+  function handleWrong(msg) {
+    msg.textContent = '❌ Nicht ganz – versuche es nochmal!';
+    msg.style.color = 'var(--c-danger)';
+    CodeChecker.shake('answerInput');
+    Avatar.speak('Das war leider nicht richtig. Schaut nochmal genauer hin!');
+  }
+
+  function avatarSpeak() {
+    const text = AVATAR_PHRASES[Math.floor(Math.random() * AVATAR_PHRASES.length)];
+    Avatar.speak(text);
+  }
+
+  function skipStation() {
+    if (confirm('Station wirklich überspringen? (Lehrer-Notfall)')) {
+      MX.completeStation(STATION_NUM, 3);
+      location.href = `/station/${STATION_NEXT}`;
+    }
+  }
+</script>
+</body>
+</html>

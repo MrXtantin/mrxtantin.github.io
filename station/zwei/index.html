@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0f1a">
+  <title>Station 2 – Das Versteck | Mister X</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+</head>
+<body>
+
+<div id="topbar" class="topbar"></div>
+
+<div class="page-wrap stack stack-lg">
+
+  <div class="station-header">
+    <div class="station-number">⚡ Station 02 von 15</div>
+    <h1 class="station-title">Das Versteck</h1>
+    <p>Mister X hat eine verschlüsselte Nachricht irgendwo im Schulhof versteckt. Findet das Versteck – und scannt den Code!</p>
+  </div>
+
+  <div class="card reveal">
+    <div class="avatar-wrap">
+      <div class="avatar-img center" style="font-size:2rem;">🤖</div>
+      <div id="avatarBubble" class="avatar-bubble">
+        Agenten! Mister X ist schlau – die Nachricht ist gut versteckt. Sucht etwas, das nicht zum Rest gehört!
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="margin:0.5rem 0 0 0.75rem;" onclick="avatarSpeak()">
+      🔊 Nochmal vorlesen
+    </button>
+  </div>
+
+  <div class="card card-accent reveal">
+    <div class="badge badge-gold" style="margin-bottom:0.75rem;">📋 Deine Aufgabe</div>
+    <h2 style="margin-bottom:0.75rem;">Der QR-Code</h2>
+    <p style="margin-bottom:1rem;">
+      Irgendwo in der Nähe von <strong>[Ort eintragen]</strong> hat Mister X einen 
+      QR-Code versteckt. Sucht ihn – er ist mit einem orangen Aufkleber markiert.
+    </p>
+    <p style="font-size:0.875rem; color:var(--c-muted);">
+      Wenn ihr ihn gefunden habt: Klickt auf "Kamera starten" und haltet die Kamera drauf!
+    </p>
+  </div>
+
+  <!-- QR SCANNER -->
+  <div class="card reveal stack stack-sm">
+    <label style="font-weight:700; font-size:0.9rem;">📷 QR-Code scannen</label>
+    <div style="position:relative; border-radius:var(--radius-md); overflow:hidden; background:#000; aspect-ratio:1; display:none;" id="cameraWrap">
+      <video id="qrVideo" style="width:100%; display:block;" playsinline muted></video>
+      <canvas id="qrCanvas" style="display:none;"></canvas>
+      <div style="position:absolute;inset:0;border:3px solid var(--c-accent);border-radius:var(--radius-md);pointer-events:none;opacity:0.6;"></div>
+      <div style="position:absolute; bottom:0.5rem; left:50%; transform:translateX(-50%); font-size:0.75rem; color:rgba(255,255,255,0.7);">Kamera sucht QR-Code...</div>
+    </div>
+    <button id="startCamBtn" class="btn btn-primary btn-full" onclick="startQR()">📷 Kamera starten</button>
+    <button id="stopCamBtn" class="btn btn-secondary btn-full" onclick="stopQR()" style="display:none;">⏹ Kamera stoppen</button>
+    <div id="feedbackMsg" style="text-align:center; font-weight:700; min-height:1.5rem;"></div>
+  </div>
+
+  <div class="card reveal stack hint-section">
+    <div class="row" style="gap:0.5rem; margin-bottom:0.25rem;">
+      <span>💡</span><strong>Tipps (kosten Sterne!)</strong>
+    </div>
+    <div class="hint-item">
+      <button class="hint-toggle" data-hint="1">
+        <span>Tipp 1 – Suchgebiet eingrenzen</span>
+        <span class="icon">›</span>
+      </button>
+      <div class="hint-body">Schaut in der Nähe von [Beschreibung Bereich 1]. Der Code ist ungefähr in Augenhöhe.</div>
+    </div>
+    <div class="hint-item">
+      <button class="hint-toggle" data-hint="2">
+        <span>Tipp 2 – Genauer Ort</span>
+        <span class="icon">›</span>
+      </button>
+      <div class="hint-body">Ihr findet den Code [sehr genauer Hinweis zum Ort]. Schaut auch mal hinter/unter [Objekt].</div>
+    </div>
+    <div class="hint-item">
+      <button class="hint-toggle" data-hint="3">
+        <span>Tipp 3 – Direktlösung</span>
+        <span class="icon">›</span>
+      </button>
+      <div class="hint-body">
+        Ihr könnt den Code auch manuell eingeben: 
+        <input class="input-field" id="manualInput" placeholder="Code eingeben..." style="margin-top:0.5rem;">
+        <button class="btn btn-primary btn-sm btn-full" onclick="manualCheck()" style="margin-top:0.5rem;">Manuell prüfen</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="teacherPanel" class="teacher-panel">
+    <strong style="color:var(--c-danger);">🔓 Lehrer-Modus – Station 2</strong><br><br>
+    <strong>QR-Code Inhalt:</strong> BRAVO<br>
+    <strong>QR-Code generieren:</strong> <a href="https://qr.io" target="_blank" style="color:var(--c-accent2);">qr.io</a> – Inhalt "BRAVO" eingeben, oranges Aufkleber-Papier<br>
+    <strong>Aufstellungsort:</strong> [Genauen Ort eintragen]<br>
+    <strong>Zeitbudget:</strong> ~10 Minuten<br>
+    <strong>Nächste Station:</strong> /station/drei<br><br>
+    <button class="btn btn-sm" style="border:1px solid var(--c-danger); color:var(--c-danger);" onclick="skipStation()">Station überspringen</button>
+  </div>
+
+  <div style="height:2rem;"></div>
+</div>
+
+<div class="bottom-nav">
+  <a href="/" class="btn btn-secondary btn-sm" style="flex:1;">← Übersicht</a>
+  <button class="btn btn-sm btn-ghost" style="flex:1;" onclick="avatarSpeak()">🤖 Agent K</button>
+</div>
+
+<div id="successOverlay" class="success-overlay"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="/assets/js/game.js"></script>
+<script>
+  const STATION_NUM    = 2;
+  const STATION_NEXT   = 'drei';
+  const CORRECT_ANSWER = 'bravo';
+
+  const AVATAR_PHRASES = [
+    'Agenten! Mister X ist schlau – sucht etwas, das nicht zum Rest gehört!',
+    'Der QR-Code ist mit einem orangen Aufkleber markiert. Schaut gut hin!',
+    'Seid ihr sicher, dass ihr wirklich überall gesucht habt?',
+  ];
+
+  let hintsThisRound = 0;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.hint-toggle').forEach(btn => {
+      btn.addEventListener('click', () => { hintsThisRound++; });
+    });
+    if (MX.state.teacherMode) document.getElementById('teacherPanel').classList.add('visible');
+    if (MX.isCompleted(STATION_NUM)) {
+      const fb = document.getElementById('feedbackMsg');
+      fb.textContent = '✅ Diese Station hast du bereits gelöst!';
+      fb.style.color = 'var(--c-success)';
+    }
+    setTimeout(() => Avatar.speak(AVATAR_PHRASES[0]), 800);
+  });
+
+  function startQR() {
+    document.getElementById('cameraWrap').style.display = 'block';
+    document.getElementById('startCamBtn').style.display = 'none';
+    document.getElementById('stopCamBtn').style.display = 'flex';
+    QRScanner.start('qrVideo', 'qrCanvas', (data) => {
+      stopQR();
+      const msg = document.getElementById('feedbackMsg');
+      if (CodeChecker.check(data, CORRECT_ANSWER)) {
+        handleSuccess(msg);
+      } else {
+        msg.textContent = '❌ Falscher QR-Code – sucht weiter!';
+        msg.style.color = 'var(--c-danger)';
+      }
+    });
+  }
+
+  function stopQR() {
+    QRScanner.stop();
+    document.getElementById('cameraWrap').style.display = 'none';
+    document.getElementById('startCamBtn').style.display = 'flex';
+    document.getElementById('stopCamBtn').style.display = 'none';
+  }
+
+  function manualCheck() {
+    const val = document.getElementById('manualInput').value;
+    const msg = document.getElementById('feedbackMsg');
+    if (CodeChecker.check(val, CORRECT_ANSWER)) {
+      handleSuccess(msg);
+    } else {
+      msg.textContent = '❌ Falscher Code!';
+      msg.style.color = 'var(--c-danger)';
+    }
+  }
+
+  function handleSuccess(msg) {
+    msg.textContent = '✅ QR-Code erkannt – richtig!';
+    msg.style.color = 'var(--c-success)';
+    const stars = MX.completeStation(STATION_NUM, hintsThisRound);
+    setTimeout(() => Success.show(STATION_NUM, stars, STATION_NEXT, 'Exzellent! Ihr habt das Versteck gefunden.'), 600);
+  }
+
+  function avatarSpeak() {
+    Avatar.speak(AVATAR_PHRASES[Math.floor(Math.random() * AVATAR_PHRASES.length)]);
+  }
+
+  function skipStation() {
+    if (confirm('Station wirklich überspringen?')) {
+      MX.completeStation(STATION_NUM, 3);
+      location.href = `/station/${STATION_NEXT}`;
+    }
+  }
+</script>
+</body>
+</html>

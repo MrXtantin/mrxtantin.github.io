@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0f1a">
+  <title>Station 15 – Mister X entlarvt! | Mister X</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <style>
+    @keyframes reveal-x {
+      0%   { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+      70%  { transform: scale(1.1) rotate(3deg); }
+      100% { transform: scale(1) rotate(0); opacity: 1; }
+    }
+    .reveal-card {
+      animation: reveal-x 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.5s both;
+    }
+    .confetti-emoji {
+      position: fixed; pointer-events: none; font-size: 2rem;
+      animation: fall 3s linear forwards;
+      top: -40px;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+    .final-stat {
+      text-align: center;
+      padding: 0.75rem;
+      background: var(--c-surface2);
+      border-radius: var(--radius-md);
+    }
+    .final-stat .val {
+      font-family: var(--font-head);
+      font-size: 1.8rem;
+      color: var(--c-accent);
+    }
+    .final-stat .lbl {
+      font-size: 0.75rem;
+      color: var(--c-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+
+<div id="topbar" class="topbar"></div>
+
+<div class="page-wrap stack stack-lg">
+
+  <div class="station-header">
+    <div class="station-number">🎯 Station 15 von 15 – FINAL</div>
+    <h1 class="station-title">Mister X entlarvt!</h1>
+    <p>Ihr habt alle Hinweise gesammelt. Wer steckt hinter dem Code-Namen Mister X?</p>
+  </div>
+
+  <div class="card reveal">
+    <div class="avatar-wrap">
+      <div class="avatar-img center" style="font-size:2rem;">🤖</div>
+      <div id="avatarBubble" class="avatar-bubble">
+        Das ist der entscheidende Moment! Alle Spuren führen zu einer Person. Löst das letzte Rätsel und entlarvt Mister X für immer!
+      </div>
+    </div>
+  </div>
+
+  <!-- LETZTE AUFGABE -->
+  <div class="card card-accent reveal">
+    <div class="badge badge-gold" style="margin-bottom:0.75rem;">🎯 Letzte Aufgabe</div>
+    <h2 style="margin-bottom:0.75rem;">Das finale Rätsel</h2>
+    <p style="margin-bottom:1rem;">
+      An Station 15 liegt ein versiegelter <strong>goldener Umschlag</strong>. 
+      Ihr braucht den Code, der sich aus den Anfangsbuchstaben aller 14 Lösungswörter ergibt.
+    </p>
+    <div class="card" style="background:var(--c-surface2); margin-bottom:1rem; text-align:center;">
+      <p style="font-family:var(--font-head); font-size:0.8rem; color:var(--c-accent); line-height:2.2;">
+        A – B – [C] – [D] – [E] – [F] – [G]<br>
+        [H] – [I] – [J] – [K] – [L] – [M] – [N]<br>
+        <span style="font-size:0.65rem; color:var(--c-muted);">← tragt hier eure Lösungsbuchstaben ein!</span>
+      </p>
+    </div>
+    <p style="font-size:0.875rem; color:var(--c-muted);">
+      Im goldenen Umschlag findet ihr den Namen von Mister X – gebt ihn unten ein!
+    </p>
+  </div>
+
+  <!-- FINALE EINGABE -->
+  <div class="card reveal stack stack-sm">
+    <label style="font-weight:700; font-size:0.9rem;">🔑 Wer ist Mister X?</label>
+    <input id="answerInput" class="input-field" type="text"
+           placeholder="Name eingeben..." autocomplete="off"
+           onkeydown="if(event.key==='Enter') checkFinal()">
+    <button class="btn btn-primary btn-full" onclick="checkFinal()">Entlarven! 🎭</button>
+    <div id="feedbackMsg" style="text-align:center; font-weight:700; min-height:1.5rem;"></div>
+  </div>
+
+  <div class="card reveal stack hint-section">
+    <div class="row" style="gap:0.5rem; margin-bottom:0.25rem;">
+      <span>💡</span><strong>Tipps (kosten Sterne!)</strong>
+    </div>
+    <div class="hint-item">
+      <button class="hint-toggle" data-hint="1">
+        <span>Tipp 1 – Wo finde ich die Buchstaben?</span>
+        <span class="icon">›</span>
+      </button>
+      <div class="hint-body">Schreibt euch die Anfangsbuchstaben aller bisherigen Lösungswörter auf. Zusammengesetzt ergibt das ein neues Wort.</div>
+    </div>
+    <div class="hint-item">
+      <button class="hint-toggle" data-hint="2">
+        <span>Tipp 2 – Direkter Hinweis</span>
+        <span class="icon">›</span>
+      </button>
+      <div class="hint-body">Im goldenen Umschlag ist ein Bild. Wer ist darauf zu sehen? Das ist Mister X!</div>
+    </div>
+    <div class="hint-item">
+      <button class="hint-toggle" data-hint="3">
+        <span>Tipp 3 – Auflösung</span>
+        <span class="icon">›</span>
+      </button>
+      <div class="hint-body">Mister X ist: <strong style="color:var(--c-accent);">[MISTER-X-NAME]</strong></div>
+    </div>
+  </div>
+
+  <!-- ENTHÜLLUNGS-KARTE (erst nach Lösung sichtbar) -->
+  <div id="revealSection" style="display:none;" class="stack stack-lg">
+
+    <div class="card reveal-card" style="text-align:center; border-color:var(--c-accent);">
+      <div style="font-size:4rem; margin-bottom:0.5rem;">🎭</div>
+      <h2 style="color:var(--c-accent); margin-bottom:0.5rem;">Mister X ist entlarvt!</h2>
+      <p style="font-size:1.1rem; color:var(--c-text);">
+        Es war <strong id="revealName" style="color:var(--c-accent); font-family:var(--font-head); font-size:1.3rem;"></strong>
+        <br>die ganze Zeit!
+      </p>
+    </div>
+
+    <!-- ENDAUSWERTUNG -->
+    <div class="card reveal">
+      <h3 style="margin-bottom:1rem; text-align:center;">📊 Eure Mission</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:1rem;">
+        <div class="final-stat">
+          <div class="val" id="statStars">–</div>
+          <div class="lbl">Sterne</div>
+        </div>
+        <div class="final-stat">
+          <div class="val" id="statTime">–</div>
+          <div class="lbl">Minuten</div>
+        </div>
+        <div class="final-stat">
+          <div class="val" id="statHints">–</div>
+          <div class="lbl">Tipps genutzt</div>
+        </div>
+        <div class="final-stat">
+          <div class="val">15</div>
+          <div class="lbl">Stationen</div>
+        </div>
+      </div>
+      <div id="rankBadge" style="text-align:center;"></div>
+    </div>
+
+    <button class="btn btn-secondary btn-full" onclick="if(confirm('Mission neu starten? Alle Fortschritte werden gelöscht.')) MX.resetState()">
+      🔄 Neue Mission starten
+    </button>
+
+  </div>
+
+  <div id="teacherPanel" class="teacher-panel">
+    <strong style="color:var(--c-danger);">🔓 Lehrer-Modus – Finale Station</strong><br><br>
+    <strong>Lösung / Mister-X-Name:</strong> [MISTER-X-NAME]<br>
+    <strong>Material:</strong> Goldener Umschlag mit Bild + Name von Mister X<br>
+    <strong>Vorbereitung:</strong> Umschlag gut verstecken oder an bestimmter Person übergeben lassen<br>
+    <strong>Dramatik-Tipp:</strong> Lehrperson kann Mister X selbst „spielen" und am Ende enthüllt werden 🎭<br>
+  </div>
+
+  <div style="height:2rem;"></div>
+</div>
+
+<div class="bottom-nav">
+  <a href="/" class="btn btn-secondary btn-sm" style="flex:1;">← Übersicht</a>
+  <button class="btn btn-sm btn-ghost" style="flex:1;" onclick="avatarSpeak()">🤖 Agent K</button>
+</div>
+
+<div id="successOverlay" class="success-overlay"></div>
+
+<script src="/assets/js/game.js"></script>
+<script>
+  const STATION_NUM    = 15;
+  const STATION_NEXT   = ''; // letzte Station – kein Weiter
+  const CORRECT_ANSWER = '[mister-x-name]'; // ← HIER Mister X Namen (lowercase)
+  const MISTER_X_DISPLAY = '[Mister-X-Name]'; // ← Schreibweise für Anzeige
+
+  let hintsThisRound = 0;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.hint-toggle').forEach(btn => {
+      btn.addEventListener('click', () => { hintsThisRound++; });
+    });
+    if (MX.state.teacherMode) document.getElementById('teacherPanel').classList.add('visible');
+    if (MX.isCompleted(STATION_NUM)) showFinal(false);
+    setTimeout(() => Avatar.speak('Das ist der entscheidende Moment! Alle Hinweise führen zu einer Person. Wer ist Mister X?'), 800);
+  });
+
+  function checkFinal() {
+    const input = document.getElementById('answerInput').value;
+    const msg   = document.getElementById('feedbackMsg');
+    if (!input.trim()) { msg.textContent = '⚠️ Namen eingeben!'; msg.style.color = 'var(--c-danger)'; return; }
+    if (CodeChecker.check(input, CORRECT_ANSWER)) {
+      msg.textContent = '🎉 RICHTIG! Mission erfolgreich!';
+      msg.style.color = 'var(--c-success)';
+      MX.completeStation(STATION_NUM, hintsThisRound);
+      launchConfetti();
+      setTimeout(() => showFinal(true), 800);
+    } else {
+      msg.textContent = '❌ Das ist nicht Mister X – denkt nochmal nach!';
+      msg.style.color = 'var(--c-danger)';
+      CodeChecker.shake('answerInput');
+    }
+  }
+
+  function showFinal(animate) {
+    document.getElementById('revealSection').style.display = 'flex';
+    document.getElementById('revealSection').style.flexDirection = 'column';
+    document.getElementById('revealSection').style.gap = '1.5rem';
+    document.getElementById('revealName').textContent = MISTER_X_DISPLAY;
+
+    const elapsed = MX.state.startTime ? Math.round((Date.now() - MX.state.startTime) / 60000) : '?';
+    document.getElementById('statStars').textContent = MX.state.stars;
+    document.getElementById('statTime').textContent  = elapsed;
+    document.getElementById('statHints').textContent = MX.state.hintsUsed;
+
+    const rank = document.getElementById('rankBadge');
+    if (MX.state.hintsUsed === 0) {
+      rank.innerHTML = '<span class="badge badge-gold" style="font-size:1rem; padding:0.5rem 1rem;">🏆 Meister-Agent!</span>';
+    } else if (MX.state.stars >= 35) {
+      rank.innerHTML = '<span class="badge badge-cyan" style="font-size:1rem; padding:0.5rem 1rem;">⭐ Spitzen-Agent!</span>';
+    } else {
+      rank.innerHTML = '<span class="badge badge-green" style="font-size:1rem; padding:0.5rem 1rem;">✅ Agent im Dienst</span>';
+    }
+
+    if (animate) {
+      Avatar.speak(`Mission abgeschlossen! Mister X – ${MISTER_X_DISPLAY} – ist entlarvt. Ihr wart fantastische Agenten!`);
+    }
+  }
+
+  function launchConfetti() {
+    const emojis = ['🎉','🎊','⭐','🏆','🎯','🕵️'];
+    for (let i = 0; i < 18; i++) {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className = 'confetti-emoji';
+        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.animationDuration = (2 + Math.random() * 2) + 's';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+      }, i * 120);
+    }
+  }
+
+  function avatarSpeak() {
+    Avatar.speak('Das ist das finale Rätsel! Zusammengesetzt ergeben alle Lösungs-Anfangsbuchstaben den Namen von Mister X!');
+  }
+</script>
+</body>
+</html>
