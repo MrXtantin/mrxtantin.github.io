@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CIPHER HUNT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --neon: #00ff88;
+    --neon2: #00ccff;
+    --neon3: #ff00aa;
+    --dark: #030308;
+    --dark2: #0a0a14;
+    --dark3: #12121e;
+    --card: #0d0d1a;
+    --border: #1a1a2e;
+    --text: #e0e0ff;
+    --muted: #6060a0;
+    --danger: #ff3366;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== SCANLINES & ATMOSPHERE ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,255,136,0.015) 2px,
+      rgba(0,255,136,0.015) 4px
+    );
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* ===== SCREEN WRAPPER ===== */
+  .screen {
+    display: none;
+    min-height: 100vh;
+    position: relative;
+    padding: 0 0 80px 0;
+  }
+  .screen.active { display: block; }
+
+  /* ===== PARTICLE CANVAS ===== */
+  #particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== HEADER ===== */
+  .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(3,3,8,0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0,255,136,0.2);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--neon);
+    text-shadow: 0 0 20px rgba(0,255,136,0.8);
+    letter-spacing: 3px;
+  }
+
+  .station-badge {
+    background: rgba(0,255,136,0.1);
+    border: 1px solid rgba(0,255,136,0.3);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--neon);
+  }
+
+  /* ===== PROGRESS BAR ===== */
+  .progress-container {
+    padding: 16px 20px 0;
+    position: relative;
+    z-index: 1;
+  }
+  .progress-track {
+    height: 4px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--neon), var(--neon2));
+    border-radius: 2px;
+    transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+  }
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -3px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--neon);
+    box-shadow: 0 0 12px var(--neon);
+  }
+
+  /* ===== CONTENT WRAPPER ===== */
+  .content {
+    position: relative;
+    z-index: 1;
+    padding: 20px;
+  }
+
+  /* ===== GLITCH TITLE ===== */
+  .glitch-title {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    position: relative;
+    display: inline-block;
+  }
+  .glitch-title::before,
+  .glitch-title::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+  }
+  .glitch-title::before {
+    color: var(--neon3);
+    animation: glitch1 3s infinite;
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+  }
+  .glitch-title::after {
+    color: var(--neon2);
+    animation: glitch2 3s infinite;
+    clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+  }
+  @keyframes glitch1 {
+    0%,94%,100% { transform: translate(0); }
+    95% { transform: translate(-3px, 1px); }
+    97% { transform: translate(3px, -1px); }
+  }
+  @keyframes glitch2 {
+    0%,94%,100% { transform: translate(0); }
+    95% { transform: translate(3px, -1px); }
+    97% { transform: translate(-3px, 1px); }
+  }
+
+  /* ===== STATION CARD ===== */
+  .station-card {
+    background: var(--card);
+    border: 1px solid rgba(0,255,136,0.2);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 16px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .station-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(0,255,136,0.4), rgba(0,204,255,0.1), rgba(255,0,170,0.1));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  .station-card.glow-active::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 17px;
+    box-shadow: 0 0 30px rgba(0,255,136,0.3), inset 0 0 30px rgba(0,255,136,0.05);
+    pointer-events: none;
+  }
+
+  /* ===== RIDDLE TEXT ===== */
+  .riddle-number {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--neon);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0.7;
+  }
+  .riddle-text {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 20px;
+    font-weight: 300;
+  }
+
+  /* ===== INPUT ===== */
+  .answer-input {
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(0,255,136,0.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 16px;
+    color: var(--text);
+    outline: none;
+    transition: all 0.3s;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    caret-color: var(--neon);
+  }
+  .answer-input:focus {
+    border-color: var(--neon);
+    box-shadow: 0 0 0 3px rgba(0,255,136,0.1), 0 0 20px rgba(0,255,136,0.15);
+    background: rgba(0,255,136,0.03);
+  }
+  .answer-input.shake {
+    animation: shake 0.4s ease;
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(255,51,102,0.1);
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+
+  /* ===== BUTTONS ===== */
+  .btn-primary {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,204,255,0.1));
+    border: 1px solid rgba(0,255,136,0.5);
+    border-radius: 12px;
+    color: var(--neon);
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    margin-top: 12px;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    background: rgba(0,255,136,0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+  .btn-primary:active::before { width: 300px; height: 300px; }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-secondary {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.3s;
+  }
+  .btn-secondary:active { background: rgba(255,255,255,0.05); color: var(--text); }
+
+  /* ===== TOOL BUTTONS ===== */
+  .tool-row {
+    display: flex;
+    gap: 10px;
+    margin: 16px 0 8px;
+  }
+  .tool-btn {
+    flex: 1;
+    padding: 12px 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    color: var(--muted);
+    font-size: 11px;
+    font-family: 'Share Tech Mono', monospace;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .tool-btn svg { width: 22px; height: 22px; }
+  .tool-btn.active {
+    border-color: rgba(0,204,255,0.5);
+    color: var(--neon2);
+    background: rgba(0,204,255,0.05);
+    box-shadow: 0 0 12px rgba(0,204,255,0.15);
+  }
+  .tool-btn:active { transform: scale(0.95); }
+
+  /* ===== CAMERA PANEL ===== */
+  .camera-panel {
+    display: none;
+    margin-top: 16px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(0,204,255,0.3);
+    position: relative;
+    background: #000;
+  }
+  .camera-panel.open { display: block; }
+  #cameraFeed {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    display: block;
+  }
+  .camera-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .scan-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon2), transparent);
+    animation: scanMove 2s linear infinite;
+    box-shadow: 0 0 10px var(--neon2);
+  }
+  @keyframes scanMove {
+    from { top: 0%; }
+    to { top: 100%; }
+  }
+  .corner-frame {
+    position: absolute;
+    width: 30px; height: 30px;
+    border-color: var(--neon2);
+    border-style: solid;
+  }
+  .corner-frame.tl { top: 10px; left: 10px; border-width: 2px 0 0 2px; }
+  .corner-frame.tr { top: 10px; right: 10px; border-width: 2px 2px 0 0; }
+  .corner-frame.bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; }
+  .corner-frame.br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; }
+
+  /* ===== VOICE PANEL ===== */
+  .voice-panel {
+    display: none;
+    margin-top: 16px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,0,170,0.3);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+  }
+  .voice-panel.open { display: block; }
+  .voice-orb {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,0,170,0.3), rgba(255,0,170,0.05));
+    border: 2px solid rgba(255,0,170,0.5);
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+  }
+  .voice-orb.listening {
+    animation: pulse-orb 1s ease-in-out infinite;
+    border-color: var(--neon3);
+    box-shadow: 0 0 30px rgba(255,0,170,0.5);
+  }
+  @keyframes pulse-orb {
+    0%,100% { transform: scale(1); box-shadow: 0 0 20px rgba(255,0,170,0.3); }
+    50% { transform: scale(1.08); box-shadow: 0 0 40px rgba(255,0,170,0.6); }
+  }
+  .voice-orb svg { width: 32px; height: 32px; }
+  .voice-transcript {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--neon3);
+    min-height: 40px;
+    line-height: 1.6;
+  }
+  .bot-response {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    padding: 12px;
+    border-left: 2px solid var(--neon3);
+    display: none;
+    text-align: left;
+  }
+  .bot-response.visible { display: block; }
+
+  /* ===== HINT SYSTEM ===== */
+  .hint-card {
+    background: rgba(255,170,0,0.05);
+    border: 1px solid rgba(255,170,0,0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 12px;
+    display: none;
+  }
+  .hint-card.visible { display: block; }
+  .hint-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: #ffaa00;
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+  .hint-text {
+    font-size: 14px;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.6;
+  }
+
+  /* ===== SUCCESS OVERLAY ===== */
+  .success-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0,0,0,0.9);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 40px;
+  }
+  .success-overlay.visible { display: flex; }
+  .success-icon {
+    font-size: 60px;
+    margin-bottom: 24px;
+    animation: bounceIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+  @keyframes bounceIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .success-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--neon);
+    text-shadow: 0 0 30px var(--neon);
+    margin-bottom: 12px;
+  }
+  .clue-box {
+    background: var(--card);
+    border: 1px solid rgba(0,255,136,0.4);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 24px 0;
+    width: 100%;
+    max-width: 340px;
+  }
+  .clue-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--neon);
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+  }
+  .clue-text {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.5;
+    color: #fff;
+  }
+  .confetti-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ===== INTRO SCREEN ===== */
+  .intro-hero {
+    padding: 60px 20px 30px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  .intro-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 42px;
+    font-weight: 900;
+    color: var(--neon);
+    text-shadow: 0 0 40px rgba(0,255,136,0.6);
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .intro-subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--neon2);
+    letter-spacing: 5px;
+    margin-bottom: 32px;
+    opacity: 0.8;
+  }
+  .intro-desc {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 300px;
+    margin: 0 auto 40px;
+  }
+  .station-count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 40px;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    transition: all 0.3s;
+  }
+  .dot.done { background: var(--neon); box-shadow: 0 0 8px var(--neon); }
+  .dot.current { background: var(--neon2); box-shadow: 0 0 8px var(--neon2); animation: dotPulse 1s infinite; }
+  @keyframes dotPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* ===== MAP SCREEN ===== */
+  #mapContainer {
+    width: 100%;
+    height: 280px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(0,204,255,0.3);
+    background: #111;
+    position: relative;
+    margin-top: 16px;
+  }
+  .map-placeholder {
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+  }
+  .map-pin-anim {
+    width: 40px; height: 40px;
+    border: 2px solid var(--neon2);
+    border-radius: 50%;
+    animation: mapPing 1.5s ease-out infinite;
+  }
+  @keyframes mapPing {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(2.5); opacity: 0; }
+  }
+
+  /* ===== FINAL SCREEN ===== */
+  .final-screen {
+    text-align: center;
+    padding: 60px 20px;
+    position: relative;
+    z-index: 1;
+  }
+  .trophy { font-size: 80px; animation: float 3s ease-in-out infinite; }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  /* ===== MISC ===== */
+  .error-msg {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--danger);
+    margin-top: 8px;
+    display: none;
+    padding-left: 4px;
+  }
+  .error-msg.visible { display: block; }
+  .attempts-left {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    text-align: right;
+  }
+  .vibrate-on-wrong { animation: shake 0.4s ease; }
+
+  .section-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .neon-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,255,136,0.3), transparent);
+    margin: 20px 0;
+  }
+
+  /* GPS Status */
+  .gps-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 12px;
+  }
+  .gps-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+  .gps-dot.active {
+    background: var(--neon);
+    box-shadow: 0 0 6px var(--neon);
+    animation: dotPulse 1s infinite;
+  }
+
+  .typewriter {
+    overflow: hidden;
+    white-space: nowrap;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .compass {
+    display: inline-block;
+    font-size: 24px;
+    animation: spin 8s linear infinite;
+    color: var(--neon2);
+  }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  .sensor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .sensor-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+  }
+  .sensor-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px;
+    color: var(--neon2);
+    margin-bottom: 4px;
+  }
+  .sensor-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* Station color themes */
+  .theme-green { --station-color: #00ff88; }
+  .theme-cyan { --station-color: #00ccff; }
+  .theme-pink { --station-color: #ff00aa; }
+  .theme-orange { --station-color: #ff8800; }
+  .theme-purple { --station-color: #aa00ff; }
+  .theme-yellow { --station-color: #ffcc00; }
+  .theme-red { --station-color: #ff3366; }
+  .theme-teal { --station-color: #00ffcc; }
+  .theme-blue { --station-color: #4488ff; }
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<canvas class="confetti-canvas" id="confettiCanvas"></canvas>
+
+<!-- ==================== INTRO SCREEN ==================== -->
+<div id="screenIntro" class="screen active">
+  <div class="intro-hero">
+    <div class="intro-title glitch-title" data-text="CIPHER">CIPHER</div>
+    <div class="intro-title glitch-title" data-text="HUNT" style="color:var(--neon2);text-shadow:0 0 40px rgba(0,204,255,0.6);">HUNT</div>
+    <div class="intro-subtitle">MISSION BRIEFING</div>
+    <p class="intro-desc">
+      15 verschlüsselte Stationen erwarten dich.<br>
+      Löse jedes Rätsel — erhalte den nächsten Hinweis.<br>
+      Benutze alle Sinne. Traue niemandem.
+    </p>
+    <div class="station-count" id="introDots"></div>
+  </div>
+  <div class="content">
+    <div class="station-card glow-active">
+      <div class="riddle-number">// SYSTEM STATUS</div>
+      <div class="sensor-grid" id="sensorStatus">
+        <div class="sensor-card">
+          <div class="sensor-value" id="statGPS">—</div>
+          <div class="sensor-label">GPS</div>
+        </div>
+        <div class="sensor-card">
+          <div class="sensor-value" id="statCam">—</div>
+          <div class="sensor-label">Kamera</div>
+        </div>
+        <div class="sensor-card">
+          <div class="sensor-value" id="statMic">—</div>
+          <div class="sensor-label">Mikrofon</div>
+        </div>
+        <div class="sensor-card">
+          <div class="sensor-value" id="statMotion">—</div>
+          <div class="sensor-label">Bewegung</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="startMission()" id="startBtn">
+      ▶ MISSION STARTEN
+    </button>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:16px;font-family:'Share Tech Mono',monospace;">
+      Bitte alle Berechtigungen erlauben
+    </p>
+  </div>
+</div>
+
+<!-- ==================== GAME SCREEN ==================== -->
+<div id="screenGame" class="screen">
+  <div class="top-bar">
+    <div class="logo">CIPHER</div>
+    <div class="station-badge" id="stationLabel">STATION 01</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted)" id="timerDisplay">00:00</div>
+  </div>
+
+  <div class="progress-container">
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--muted);font-family:'Share Tech Mono',monospace">
+      <span id="progressText">0 / 15</span>
+      <div class="gps-status">
+        <div class="gps-dot" id="gpsDot"></div>
+        <span id="gpsText">GPS sucht...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Station Header -->
+    <div style="margin-bottom:20px">
+      <div class="section-title" id="stationNumber">STATION 01 / 15</div>
+      <div class="glitch-title" id="stationTitle" data-text="STATION" style="font-size:26px;color:var(--neon);">RÄTSEL</div>
+    </div>
+
+    <!-- Riddle Card -->
+    <div class="station-card glow-active" id="riddleCard">
+      <div class="riddle-number" id="riddleCategory">// ENTSCHLÜSSELE</div>
+      <div class="riddle-text" id="riddleText">Lade...</div>
+    </div>
+
+    <!-- Tool Buttons -->
+    <div class="tool-row">
+      <button class="tool-btn" id="btnCamera" onclick="toggleCamera()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        KAMERA
+      </button>
+      <button class="tool-btn" id="btnVoice" onclick="toggleVoice()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+          <path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/>
+        </svg>
+        SPRACHE
+      </button>
+      <button class="tool-btn" id="btnCompass" onclick="toggleCompass()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36z"/>
+        </svg>
+        SENSOR
+      </button>
+    </div>
+
+    <!-- Camera Panel -->
+    <div class="camera-panel" id="cameraPanel">
+      <video id="cameraFeed" autoplay playsinline muted></video>
+      <div class="camera-overlay">
+        <div class="scan-line"></div>
+        <div class="corner-frame tl"></div>
+        <div class="corner-frame tr"></div>
+        <div class="corner-frame bl"></div>
+        <div class="corner-frame br"></div>
+      </div>
+    </div>
+
+    <!-- Voice Panel -->
+    <div class="voice-panel" id="voicePanel">
+      <div class="voice-orb" id="voiceOrb" onclick="toggleListening()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--neon3)" stroke-width="2">
+          <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+          <path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/>
+        </svg>
+      </div>
+      <div class="voice-transcript" id="voiceTranscript">Auf den Orb tippen zum Sprechen...</div>
+      <div class="bot-response" id="botResponse"></div>
+    </div>
+
+    <!-- Sensor / Compass Panel -->
+    <div id="compassPanel" style="display:none;margin-top:16px">
+      <div class="station-card">
+        <div class="riddle-number">// SENSORDATEN</div>
+        <div class="sensor-grid">
+          <div class="sensor-card">
+            <div class="sensor-value" id="compassDeg">—°</div>
+            <div class="sensor-label">Kompass</div>
+          </div>
+          <div class="sensor-card">
+            <div class="sensor-value" id="deviceBeta">—°</div>
+            <div class="sensor-label">Neigung</div>
+          </div>
+          <div class="sensor-card">
+            <div class="sensor-value" id="latDisplay">—</div>
+            <div class="sensor-label">Latitude</div>
+          </div>
+          <div class="sensor-card">
+            <div class="sensor-value" id="lonDisplay">—</div>
+            <div class="sensor-label">Longitude</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hint System -->
+    <div class="hint-card" id="hintCard">
+      <div class="hint-label">// HINWEIS</div>
+      <div class="hint-text" id="hintText"></div>
+    </div>
+
+    <div class="neon-divider"></div>
+
+    <!-- Answer Input -->
+    <div class="section-title">DEINE ANTWORT</div>
+    <input type="text" class="answer-input" id="answerInput" placeholder="ANTWORT EINGEBEN..."
+      autocomplete="off" autocorrect="off" spellcheck="false"
+      onkeydown="if(event.key==='Enter')checkAnswer()">
+    <div class="error-msg" id="errorMsg">⚠ FALSCHE ANTWORT — VERSUCHE ES ERNEUT</div>
+    <div class="attempts-left" id="attemptsLeft"></div>
+
+    <button class="btn-primary" onclick="checkAnswer()">ANTWORT BESTÄTIGEN ▶</button>
+    <button class="btn-secondary" onclick="showHint()">💡 Hinweis anfordern</button>
+    <button class="btn-secondary" onclick="skipStation()" id="skipBtn" style="display:none">⏭ Station überspringen</button>
+  </div>
+</div>
+
+<!-- ==================== FINAL SCREEN ==================== -->
+<div id="screenFinal" class="screen">
+  <div class="final-screen">
+    <div class="trophy">🏆</div>
+    <div class="intro-title" style="margin:20px 0 8px">MISSION</div>
+    <div class="intro-title" style="color:var(--neon2)">COMPLETE</div>
+    <p style="margin:20px 0;font-size:15px;color:var(--muted);line-height:1.8">
+      Du hast alle 15 Stationen gemeistert.<br>
+      Respekt, Agent.
+    </p>
+    <div class="station-card" style="margin:24px 0">
+      <div class="riddle-number">// DEINE STATS</div>
+      <div class="sensor-grid">
+        <div class="sensor-card">
+          <div class="sensor-value" id="finalTime" style="color:var(--neon)">—</div>
+          <div class="sensor-label">Gesamtzeit</div>
+        </div>
+        <div class="sensor-card">
+          <div class="sensor-value" id="finalHints" style="color:var(--neon2)">—</div>
+          <div class="sensor-label">Hinweise</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="resetGame()">↩ NOCHMAL SPIELEN</button>
+  </div>
+</div>
+
+<!-- ==================== SUCCESS OVERLAY ==================== -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-icon">✅</div>
+  <div class="success-title" id="successTitle">STATION GELÖST!</div>
+  <p style="color:var(--muted);font-size:14px;margin:8px 0 0">Hier ist dein nächster Hinweis:</p>
+  <div class="clue-box">
+    <div class="clue-label">// NÄCHSTE STATION</div>
+    <div class="clue-text" id="clueText"></div>
+  </div>
+  <button class="btn-primary" onclick="nextStation()" style="max-width:320px">WEITER ZUR NÄCHSTEN STATION ▶</button>
+</div>
+
+<script>
+// ===================== GAME DATA =====================
+// HIER KANNST DU DEINE STATIONEN ANPASSEN!
+const STATIONS = [
+  {
+    title: "INITIALISIERUNG",
+    category: "// STATION 01 — ZAHLENCODE",
+    theme: "theme-green",
+    riddle: "Wir beginnen, wo alles anfängt. Die erste Primzahl nach 10, multipliziert mit dem dritten Buchstaben des Alphabets (Zahlenwert). Was ergibt das?",
+    answer: "33",
+    hint: "Primzahlen nach 10: 11, 13... Der dritte Buchstabe C = 3.",
+    clue: "Begib dich zum ÄLTESTEN BAUM in eurer Nähe. Unter seinem mächtigsten Ast wartet das Nächste.",
+    category_icon: "🔢"
+  },
+  {
+    title: "SCHATTEN",
+    category: "// STATION 02 — BILDCODE",
+    theme: "theme-cyan",
+    riddle: "Ich habe Städte, aber keine Häuser.\nIch habe Berge, aber keine Bäume.\nIch habe Wasser, aber keine Fische.\nIch habe Straßen, aber keine Autos.\nWas bin ich?",
+    answer: "KARTE",
+    hint: "Du findest mich in deiner Hosentasche auf dem Handy...",
+    clue: "Suche das ROTE FAHRRAD das an einem Zaun steht. An der Lenkstange hängt ein Brief.",
+    category_icon: "🗺️"
+  },
+  {
+    title: "FREQUENZ",
+    category: "// STATION 03 — PHONETIK",
+    theme: "theme-pink",
+    riddle: "Aktiviere das Mikrofon und sage folgendes Wort laut: Das Gegenteil von LAUT. Tippe dann das Wort ein, das du gesagt hast.",
+    answer: "LEISE",
+    hint: "Laut = laut, leise = ?",
+    clue: "Die nächste Station wartet an einem BLAUEN BRIEFKASTEN. Schaue unter dem Einwurfschlitz.",
+    category_icon: "🎤"
+  },
+  {
+    title: "KOORDINATEN",
+    category: "// STATION 04 — NAVIGATION",
+    theme: "theme-orange",
+    riddle: "Öffne den Kompass-Sensor. Drehe dich exakt nach NORDEN (0°). Gib das Himmelsrichtungs-Kürzel ein, das GENAU GEGENÜBER von Norden liegt.",
+    answer: "SÜDEN",
+    hint: "Norden ist 0°, sein Gegenteil ist...?",
+    clue: "Laufe 50 Schritte in Richtung SONNENUNTERGANG. Am Ende siehst du eine BANK — schau darunter.",
+    category_icon: "🧭"
+  },
+  {
+    title: "GEHEIMSCHRIFT",
+    category: "// STATION 05 — CIPHER",
+    theme: "theme-purple",
+    riddle: "Entschlüssle diese ROT-13 Nachricht:\nFGNQG\n\n(Jeder Buchstabe wird um 13 Positionen verschoben)",
+    answer: "STADT",
+    hint: "ROT13: S→F... wende das umgekehrt an. F→S, T→G, N→A, Q→D, T→G",
+    clue: "Du suchst jetzt den HÖCHSTEN PUNKT in Sichtweite. Dort oben klebt ein QR-ähnlicher Aufkleber.",
+    category_icon: "🔐"
+  },
+  {
+    title: "OPTIK",
+    category: "// STATION 06 — KAMERA",
+    theme: "theme-yellow",
+    riddle: "Richte deine Kamera auf einen SPIEGEL oder eine reflektierende Fläche. Was siehst du? Tippe das ein, was du IMMER bei dir trägst und gerade siehst.",
+    answer: "HANDY",
+    hint: "Du hältst gerade etwas in der Hand, das du auf den Spiegel richtest...",
+    clue: "Geh zur BRÜCKE oder zum nächsten Übergang. Unter der linken Seite ist etwas befestigt.",
+    category_icon: "📷"
+  },
+  {
+    title: "GEOMETRIE",
+    category: "// STATION 07 — MATHEMATIK",
+    theme: "theme-teal",
+    riddle: "Ein Würfel hat wie viele Ecken?\nEin Würfel hat wie viele Flächen?\nMultipliziere beide Zahlen.\nErgebnis?",
+    answer: "48",
+    hint: "Ecken: 8, Flächen: 6. 8 × 6 = ?",
+    clue: "Suche den nächsten BRUNNEN oder Wasserhahn im Freien. Direkt daneben liegt der nächste Hinweis.",
+    category_icon: "📐"
+  },
+  {
+    title: "FREQUENZ",
+    category: "// STATION 08 — AKUSTIK",
+    theme: "theme-green",
+    riddle: "Benutze den Sprachbot und frage ihn: 'Was ist der Morse-Code für SOS?'\nDann tippe die Antwort ein: ??? ??? ???\n(Punkte und Striche)",
+    answer: "... --- ...",
+    hint: "SOS in Morse: S = drei Punkte, O = drei Striche",
+    clue: "Die nächste Station liegt beim DICKSTEN BAUM den du siehst. Am Stamm auf Augenhöhe.",
+    category_icon: "📡"
+  },
+  {
+    title: "SCHATTEN",
+    category: "// STATION 09 — ORIENTIERUNG",
+    theme: "theme-blue",
+    riddle: "Schau auf die aktuelle Uhrzeit auf deinem Handy. Addiere alle Ziffern. Wenn es z.B. 14:32 ist: 1+4+3+2 = 10. Was ergibt deine aktuelle Zeit?",
+    answer: null, // dynamic
+    hint: "Schau oben in die Statusleiste — was zeigt dein Handy?",
+    clue: "Gehe zum nächsten PLATZ oder freien Fläche. In der Mitte oder an einer Ecke wartet der Hinweis.",
+    category_icon: "⏰",
+    dynamic: true,
+    dynamicCalc: function() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2,'0');
+      const m = String(now.getMinutes()).padStart(2,'0');
+      const digits = (h + m).split('').map(Number);
+      return String(digits.reduce((a,b) => a+b, 0));
+    },
+    dynamicRiddle: function() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2,'0');
+      const m = String(now.getMinutes()).padStart(2,'0');
+      return `Schau auf die aktuelle Uhrzeit: ${h}:${m}\n\nAddiere alle Stellen: ${h[0]} + ${h[1]} + ${m[0]} + ${m[1]} = ?`;
+    }
+  },
+  {
+    title: "ENTSCHLÜSSELUNG",
+    category: "// STATION 10 — SPRACHE",
+    theme: "theme-pink",
+    riddle: "Aktiviere den Sprachbot und stelle ihm diese Frage:\n\"Was ist die Hauptstadt von Deutschland?\"\n\nTippe die Antwort ein:",
+    answer: "BERLIN",
+    hint: "Der Sprachbot kennt die Antwort — oder du weißt es selbst!",
+    clue: "Suche den nächsten LADEN oder ein Schaufenster. Auf der linken Seite der Tür ist ein Aufkleber.",
+    category_icon: "🗣️"
+  },
+  {
+    title: "SCHWERKRAFT",
+    category: "// STATION 11 — SENSOR",
+    theme: "theme-orange",
+    riddle: "Öffne die Sensor-Ansicht. Lege dein Handy FLACH auf den Tisch. Wie viele Grad zeigt die 'Neigung' an?\n\nGib 'NULL' ein wenn der Wert unter 5° liegt.",
+    answer: "NULL",
+    hint: "Wenn das Handy flach liegt, sollte die Neigung nahe 0 sein.",
+    clue: "Begib dich zur nächsten TELEFONZELLE oder einem ähnlichen Objekt. Schau ganz unten.",
+    category_icon: "📱"
+  },
+  {
+    title: "DUNKELHEIT",
+    category: "// STATION 12 — LOGIK",
+    theme: "theme-purple",
+    riddle: "Ein Mann geht im Dunkeln.\nKein Licht, kein Mond.\nEin schwarzes Auto ohne Lichter kommt auf ihn zu.\nDer Fahrer bremst rechtzeitig — wie sah er den Mann?\n\n(Einwortige Antwort)",
+    answer: "TAG",
+    hint: "Es ist dunkel... oder ist es das? Wann gibt es kein Mondlicht UND es ist trotzdem hell?",
+    clue: "Du näherst dich dem Ziel. Suche die TREPPE oder den nächsten Aufstieg. Am obersten Stufe liegt ein Briefumschlag.",
+    category_icon: "🌑"
+  },
+  {
+    title: "QUANTENSPRUNG",
+    category: "// STATION 13 — BIOMETRIE",
+    theme: "theme-red",
+    riddle: "Photograph mit der Kamera deine eigene HAND.\n\nWie viele Finger hat eine normale menschliche Hand?\n\n(In Buchstaben)",
+    answer: "FÜNF",
+    hint: "Zähle deine Finger...",
+    clue: "Die vorletzte Station! Suche das nächste DENKMAL oder eine Skulptur. Am Sockel liegt der Hinweis.",
+    category_icon: "🤚"
+  },
+  {
+    title: "ENDSPURT",
+    category: "// STATION 14 — KOMBINATION",
+    theme: "theme-cyan",
+    riddle: "Die Kombination aller bisherigen Hints ergibt das Passwort.\n\nAber auch ohne das: Was hat Zähne, aber keinen Mund?",
+    answer: "KAMM",
+    hint: "Zähne ohne Mund... etwas das man benutzt um Haare zu ordnen.",
+    clue: "FAST GESCHAFFT! Die finale Station wartet am STARTPUNKT. Genau dort, wo ihr heute losgegangen seid.",
+    category_icon: "🔑"
+  },
+  {
+    title: "FINALE",
+    category: "// STATION 15 — MISSION COMPLETE",
+    theme: "theme-yellow",
+    riddle: "Du hast es bis hierher geschafft. Die letzte Frage: Was ist das Wichtigste bei einer Schnitzeljagd?\n\nAntwort: Der Spaß! Tippe CIPHER ein um die Mission abzuschließen.",
+    answer: "CIPHER",
+    hint: "Das Passwort steht im Namen dieser App...",
+    clue: "🎉 MISSION COMPLETE! Du hast alle 15 Stationen gelöst! Herzlichen Glückwunsch, Agent!",
+    category_icon: "🏆"
+  }
+];
+
+// ===================== GAME STATE =====================
+let currentStation = 0;
+let attempts = 0;
+let maxAttempts = 5;
+let hintsUsed = 0;
+let startTime = null;
+let timerInterval = null;
+let cameraStream = null;
+let recognition = null;
+let isListening = false;
+let gpsWatcher = null;
+
+// ===================== INIT =====================
+document.addEventListener('DOMContentLoaded', () => {
+  initParticles();
+  buildIntro();
+  loadProgress();
+  checkSensors();
+});
+
+function buildIntro() {
+  const dots = document.getElementById('introDots');
+  dots.innerHTML = '';
+  for(let i = 0; i < 15; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < currentStation ? ' done' : i === currentStation ? ' current' : '');
+    dots.appendChild(d);
+  }
+}
+
+function loadProgress() {
+  try {
+    const saved = localStorage.getItem('cipherHuntProgress');
+    if(saved) {
+      const data = JSON.parse(saved);
+      currentStation = data.station || 0;
+      hintsUsed = data.hints || 0;
+      startTime = data.startTime || null;
+    }
+  } catch(e) {}
+}
+
+function saveProgress() {
+  try {
+    localStorage.setItem('cipherHuntProgress', JSON.stringify({
+      station: currentStation,
+      hints: hintsUsed,
+      startTime: startTime
+    }));
+  } catch(e) {}
+}
+
+// ===================== SENSOR CHECK =====================
+async function checkSensors() {
+  // GPS
+  if(navigator.geolocation) {
+    document.getElementById('statGPS').textContent = 'OK';
+    document.getElementById('statGPS').style.color = 'var(--neon)';
+  } else {
+    document.getElementById('statGPS').textContent = '—';
+  }
+
+  // Camera
+  if(navigator.mediaDevices) {
+    document.getElementById('statCam').textContent = 'OK';
+    document.getElementById('statCam').style.color = 'var(--neon)';
+  }
+
+  // Mic / Speech
+  if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    document.getElementById('statMic').textContent = 'OK';
+    document.getElementById('statMic').style.color = 'var(--neon)';
+  }
+
+  // Motion
+  if(window.DeviceOrientationEvent) {
+    document.getElementById('statMotion').textContent = 'OK';
+    document.getElementById('statMotion').style.color = 'var(--neon)';
+  }
+}
+
+// ===================== START MISSION =====================
+async function startMission() {
+  if(!startTime) startTime = Date.now();
+
+  // Request permissions
+  try {
+    await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  } catch(e) {}
+
+  if(navigator.geolocation) {
+    gpsWatcher = navigator.geolocation.watchPosition(updateGPS, null, {
+      enableHighAccuracy: true, maximumAge: 10000
+    });
+  }
+
+  showScreen('screenGame');
+  loadStation(currentStation);
+  startTimer();
+  saveProgress();
+}
+
+function startTimer() {
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+  if(!startTime) return;
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const m = Math.floor(elapsed / 60).toString().padStart(2,'0');
+  const s = (elapsed % 60).toString().padStart(2,'0');
+  document.getElementById('timerDisplay').textContent = m + ':' + s;
+}
+
+function updateGPS(pos) {
+  const lat = pos.coords.latitude.toFixed(5);
+  const lon = pos.coords.longitude.toFixed(5);
+  const dot = document.getElementById('gpsDot');
+  if(dot) dot.className = 'gps-dot active';
+  const txt = document.getElementById('gpsText');
+  if(txt) txt.textContent = lat + '° N';
+  const latD = document.getElementById('latDisplay');
+  const lonD = document.getElementById('lonDisplay');
+  if(latD) latD.textContent = lat;
+  if(lonD) lonD.textContent = lon;
+}
+
+// ===================== LOAD STATION =====================
+function loadStation(index) {
+  if(index >= STATIONS.length) {
+    showFinalScreen();
+    return;
+  }
+
+  const s = STATIONS[index];
+  attempts = 0;
+
+  // Update UI elements
+  document.getElementById('stationLabel').textContent = 'STATION ' + String(index+1).padStart(2,'0');
+  document.getElementById('stationNumber').textContent = 'STATION ' + (index+1) + ' / 15';
+  const titleEl = document.getElementById('stationTitle');
+  titleEl.textContent = s.title;
+  titleEl.setAttribute('data-text', s.title);
+
+  // Set station color theme  
+  const themes = ['theme-green','theme-cyan','theme-pink','theme-orange','theme-purple','theme-yellow','theme-red','theme-teal','theme-blue'];
+  document.getElementById('riddleCard').className = 'station-card glow-active';
+
+  const colors = ['#00ff88','#00ccff','#ff00aa','#ff8800','#aa00ff','#ffcc00','#ff3366','#00ffcc','#4488ff'];
+  const color = colors[index % colors.length];
+  document.documentElement.style.setProperty('--neon', color);
+
+  document.getElementById('riddleCategory').textContent = s.category;
+  
+  let riddleContent = s.riddle;
+  if(s.dynamic && s.dynamicRiddle) riddleContent = s.dynamicRiddle();
+  document.getElementById('riddleText').textContent = riddleContent;
+
+  // Progress
+  const pct = (index / 15) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = index + ' / 15';
+
+  // Reset panels
+  document.getElementById('answerInput').value = '';
+  document.getElementById('errorMsg').className = 'error-msg';
+  document.getElementById('hintCard').className = 'hint-card';
+  document.getElementById('attemptsLeft').textContent = '';
+  closeCamera();
+  closeVoice();
+  document.getElementById('compassPanel').style.display = 'none';
+  document.getElementById('btnCamera').className = 'tool-btn';
+  document.getElementById('btnVoice').className = 'tool-btn';
+  document.getElementById('btnCompass').className = 'tool-btn';
+
+  // Skip button after 3 wrong attempts
+  document.getElementById('skipBtn').style.display = 'none';
+
+  saveProgress();
+  window.scrollTo(0,0);
+
+  // Vibrate on new station
+  if(navigator.vibrate) navigator.vibrate([50,30,50]);
+}
+
+// ===================== CHECK ANSWER =====================
+function checkAnswer() {
+  const s = STATIONS[currentStation];
+  const input = document.getElementById('answerInput').value.trim().toUpperCase();
+
+  let correct = false;
+  if(s.dynamic && s.dynamicCalc) {
+    correct = input === s.dynamicCalc().toUpperCase();
+  } else {
+    correct = input === s.answer.toUpperCase().replace(/\s+/g,' ');
+  }
+
+  if(correct) {
+    showSuccess();
+  } else {
+    attempts++;
+    if(navigator.vibrate) navigator.vibrate([100,50,100]);
+
+    const inputEl = document.getElementById('answerInput');
+    inputEl.classList.add('shake');
+    setTimeout(() => inputEl.classList.remove('shake'), 500);
+
+    const err = document.getElementById('errorMsg');
+    err.className = 'error-msg visible';
+
+    const remaining = maxAttempts - attempts;
+    const attEl = document.getElementById('attemptsLeft');
+    attEl.textContent = remaining + ' Versuche verbleibend';
+
+    if(attempts >= 3) {
+      document.getElementById('skipBtn').style.display = 'block';
+    }
+
+    if(attempts >= maxAttempts) {
+      showHint();
+    }
+  }
+}
+
+// ===================== SUCCESS =====================
+function showSuccess() {
+  const s = STATIONS[currentStation];
+  document.getElementById('clueText').textContent = s.clue;
+
+  if(currentStation === 14) {
+    document.getElementById('successTitle').textContent = '🎉 MISSION COMPLETE!';
+  } else {
+    document.getElementById('successTitle').textContent = 'STATION ' + (currentStation+1) + ' GELÖST!';
+  }
+
+  document.getElementById('successOverlay').className = 'success-overlay visible';
+  launchConfetti();
+
+  if(navigator.vibrate) navigator.vibrate([50,50,50,50,200]);
+}
+
+function nextStation() {
+  document.getElementById('successOverlay').className = 'success-overlay';
+  currentStation++;
+  saveProgress();
+
+  if(currentStation >= STATIONS.length) {
+    showFinalScreen();
+  } else {
+    loadStation(currentStation);
+    buildIntro();
+  }
+}
+
+// ===================== HINT =====================
+function showHint() {
+  const s = STATIONS[currentStation];
+  hintsUsed++;
+  saveProgress();
+
+  document.getElementById('hintText').textContent = s.hint;
+  document.getElementById('hintCard').className = 'hint-card visible';
+
+  if(navigator.vibrate) navigator.vibrate(30);
+}
+
+// ===================== SKIP =====================
+function skipStation() {
+  if(confirm('Station überspringen? (Kein Punkt)')) {
+    currentStation++;
+    saveProgress();
+    if(currentStation >= STATIONS.length) showFinalScreen();
+    else loadStation(currentStation);
+  }
+}
+
+// ===================== CAMERA =====================
+async function toggleCamera() {
+  const panel = document.getElementById('cameraPanel');
+  const btn = document.getElementById('btnCamera');
+
+  if(panel.classList.contains('open')) {
+    closeCamera();
+    btn.className = 'tool-btn';
+  } else {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 } }
+      });
+      cameraStream = stream;
+      const video = document.getElementById('cameraFeed');
+      video.srcObject = stream;
+      panel.classList.add('open');
+      btn.className = 'tool-btn active';
+    } catch(e) {
+      alert('Kamera konnte nicht geöffnet werden. Bitte Berechtigung erlauben.');
+    }
+  }
+}
+
+function closeCamera() {
+  if(cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+  document.getElementById('cameraPanel').classList.remove('open');
+  document.getElementById('cameraFeed').srcObject = null;
+}
+
+// ===================== VOICE / SPEECH =====================
+function toggleVoice() {
+  const panel = document.getElementById('voicePanel');
+  const btn = document.getElementById('btnVoice');
+
+  if(panel.classList.contains('open')) {
+    closeVoice();
+    btn.className = 'tool-btn';
+  } else {
+    panel.classList.add('open');
+    btn.className = 'tool-btn active';
+  }
+}
+
+function closeVoice() {
+  document.getElementById('voicePanel').classList.remove('open');
+  if(isListening) stopListening();
+}
+
+function toggleListening() {
+  if(isListening) stopListening();
+  else startListening();
+}
+
+function startListening() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition) {
+    document.getElementById('voiceTranscript').textContent = 'Spracherkennung nicht verfügbar.';
+    return;
+  }
+
+  recognition = new SpeechRecognition();
+  recognition.lang = 'de-DE';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    isListening = true;
+    document.getElementById('voiceOrb').classList.add('listening');
+    document.getElementById('voiceTranscript').textContent = '🎙 Höre zu...';
+    if(navigator.vibrate) navigator.vibrate(50);
+  };
+
+  recognition.onresult = (e) => {
+    let transcript = '';
+    for(let i = e.resultIndex; i < e.results.length; i++) {
+      transcript += e.results[i][0].transcript;
+    }
+    document.getElementById('voiceTranscript').textContent = '> ' + transcript;
+    if(e.results[e.results.length-1].isFinal) {
+      processVoiceInput(transcript);
+    }
+  };
+
+  recognition.onerror = (e) => {
+    stopListening();
+    document.getElementById('voiceTranscript').textContent = 'Fehler: ' + e.error;
+  };
+
+  recognition.onend = () => stopListening();
+  recognition.start();
+}
+
+function stopListening() {
+  isListening = false;
+  document.getElementById('voiceOrb').classList.remove('listening');
+  if(recognition) recognition.stop();
+}
+
+function processVoiceInput(text) {
+  const lower = text.toLowerCase();
+  const botEl = document.getElementById('botResponse');
+  let response = '';
+
+  // Context-aware bot responses
+  if(lower.includes('morse') || lower.includes('sos')) {
+    response = 'SOS in Morse-Code lautet: ... --- ... (drei Punkte, drei Striche, drei Punkte)';
+  } else if(lower.includes('hauptstadt') && lower.includes('deutschland')) {
+    response = 'Die Hauptstadt von Deutschland ist Berlin.';
+  } else if(lower.includes('hinweis') || lower.includes('hilfe')) {
+    response = 'Ich kann dir einen kleinen Hinweis geben: ' + STATIONS[currentStation].hint;
+    hintsUsed++;
+  } else if(lower.includes('nächste') || lower.includes('wo')) {
+    response = 'Der Hinweis für die nächste Station wird enthüllt, sobald du das aktuelle Rätsel gelöst hast!';
+  } else if(lower.includes('primzahl')) {
+    response = 'Primzahlen sind: 2, 3, 5, 7, 11, 13, 17, 19, 23... Nur durch 1 und sich selbst teilbar.';
+  } else if(lower.includes('antwort')) {
+    response = 'Die Antwort musst du selbst herausfinden! Aber der Hinweis-Button kann helfen.';
+  } else {
+    response = 'Ich habe dich verstanden: "' + text + '". Ich kann dir bei Rätseln, Faktenfragen und Navigation helfen!';
+  }
+
+  // Speak response
+  if('speechSynthesis' in window && response) {
+    const utterance = new SpeechSynthesisUtterance(response);
+    utterance.lang = 'de-DE';
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  botEl.textContent = '🤖 ' + response;
+  botEl.className = 'bot-response visible';
+
+  // Auto-fill if matches answer
+  const answerUpper = response.toUpperCase();
+  // Don't auto-fill for security
+}
+
+// ===================== COMPASS / SENSORS =====================
+function toggleCompass() {
+  const panel = document.getElementById('compassPanel');
+  const btn = document.getElementById('btnCompass');
+
+  if(panel.style.display !== 'none') {
+    panel.style.display = 'none';
+    btn.className = 'tool-btn';
+    window.removeEventListener('deviceorientation', handleOrientation);
+  } else {
+    panel.style.display = 'block';
+    btn.className = 'tool-btn active';
+
+    if(window.DeviceOrientationEvent) {
+      if(typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(state => {
+          if(state === 'granted') window.addEventListener('deviceorientation', handleOrientation);
+        });
+      } else {
+        window.addEventListener('deviceorientation', handleOrientation);
+      }
+    }
+  }
+}
+
+function handleOrientation(e) {
+  const alpha = e.alpha ? Math.round(e.alpha) : 0;
+  const beta = e.beta ? Math.round(e.beta) : 0;
+  const el = document.getElementById('compassDeg');
+  const betaEl = document.getElementById('deviceBeta');
+  if(el) el.textContent = alpha + '°';
+  if(betaEl) betaEl.textContent = beta + '°';
+}
+
+// ===================== SCREENS =====================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showFinalScreen() {
+  if(timerInterval) clearInterval(timerInterval);
+
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const m = Math.floor(elapsed / 60);
+  const s = elapsed % 60;
+
+  document.getElementById('finalTime').textContent = m + 'min ' + s + 's';
+  document.getElementById('finalHints').textContent = hintsUsed;
+
+  showScreen('screenFinal');
+  launchConfetti();
+
+  localStorage.removeItem('cipherHuntProgress');
+}
+
+function resetGame() {
+  currentStation = 0;
+  attempts = 0;
+  hintsUsed = 0;
+  startTime = null;
+  localStorage.removeItem('cipherHuntProgress');
+  document.documentElement.style.setProperty('--neon', '#00ff88');
+  buildIntro();
+  showScreen('screenIntro');
+}
+
+// ===================== CONFETTI =====================
+function launchConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = [];
+  const colors = ['#00ff88','#00ccff','#ff00aa','#ffcc00','#ff3366','#aa00ff'];
+
+  for(let i = 0; i < 120; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: -10,
+      vx: (Math.random() - 0.5) * 4,
+      vy: Math.random() * 3 + 2,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: Math.random() * 8 + 4,
+      rot: Math.random() * 360,
+      rotV: (Math.random() - 0.5) * 10
+    });
+  }
+
+  let frame = 0;
+  function animConfetti() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.rotV;
+      p.vy += 0.1;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+      ctx.restore();
+    });
+    frame++;
+    if(frame < 180) requestAnimationFrame(animConfetti);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  animConfetti();
+}
+
+// ===================== PARTICLES =====================
+function initParticles() {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const pts = [];
+  for(let i = 0; i < 60; i++) {
+    pts.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      size: Math.random() * 1.5 + 0.5,
+      opacity: Math.random() * 0.4 + 0.1
+    });
+  }
+
+  function animParts() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const neon = getComputedStyle(document.documentElement).getPropertyValue('--neon').trim() || '#00ff88';
+    pts.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      if(p.x < 0) p.x = canvas.width;
+      if(p.x > canvas.width) p.x = 0;
+      if(p.y < 0) p.y = canvas.height;
+      if(p.y > canvas.height) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+      ctx.fillStyle = neon + Math.floor(p.opacity * 255).toString(16).padStart(2,'0');
+      ctx.fill();
+    });
+    requestAnimationFrame(animParts);
+  }
+  animParts();
+}
+</script>
+</body>
+</html>
