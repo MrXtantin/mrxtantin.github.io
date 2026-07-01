@@ -772,7 +772,7 @@
 <!-- ==================== GAME SCREEN ==================== -->
 <div id="screenGame" class="screen">
   <div class="top-bar">
-    <div class="logo">CIPHER</div>
+    <div class="logo">Mister-X</div>
     <div class="station-badge" id="stationLabel">STATION 01</div>
     <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted)" id="timerDisplay">00:00</div>
   </div>
@@ -943,15 +943,16 @@
 // HIER KANNST DU DEINE STATIONEN ANPASSEN!
 const STATIONS = [
   {
-    title: "INITIALISIERUNG",
-    category: "// STATION 01 — ZAHLENCODE",
-    theme: "theme-green",
-    riddle: "Wir beginnen, wo alles anfängt. Die erste Primzahl nach 10, multipliziert mit dem dritten Buchstaben des Alphabets (Zahlenwert). Was ergibt das?",
-    answer: "33",
-    hint: "Primzahlen nach 10: 11, 13... Der dritte Buchstabe C = 3.",
-    clue: "Begib dich zum ÄLTESTEN BAUM in eurer Nähe. Unter seinem mächtigsten Ast wartet das Nächste.",
-    category_icon: "🔢"
-  },
+  title: "INITIALISIERUNG",
+  category: "// STATION 01 — Entfernung",
+  theme: "theme-green",
+  riddle: "Wir beginnen, wo alles anfängt, die Marienkirche. Die erste Lösung ist die Entfernung der Kirchen in Metern ohne die Kurve.",
+  answer: 33,
+  tolerance: 3,
+  hint: "Lauft die Strecke.",
+  clue: "Die nächste Aufgabe findet im Garten der Kirche.",
+  category_icon: "🧭"
+}
   {
     title: "SCHATTEN",
     category: "// STATION 02 — BILDCODE",
